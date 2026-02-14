@@ -1,0 +1,49 @@
+# Django & DRF
+Django==4.2.8
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+
+# Environment & Configuration
+python-decouple==3.8
+
+# Database
+psycopg2-binary==2.9.9
+
+# Image Processing
+Pillow==10.1.0
+
+# Cloud Storage
+cloudinary==1.36.0
+django-cloudinary-storage==0.3.1
+
+# Server & Production
+gunicorn==21.2.0
+whitenoise==6.6.0
+
+# API Documentation
+drf-spectacular==0.26.5
+
+# Testing
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-cov==4.1.0
+factory-boy==3.3.0
+
+# Code Quality
+flake8==6.1.0
+black==23.12.1
+isort==5.13.2
+
+# Utilities
+requests==2.31.0
+python-dateutil==2.8.2
+
+# Email
+django-anymail==10.1
+
+# Rate Limiting
+django-ratelimit==4.1.0
+
+# Security
+django-environ==0.21.0
+

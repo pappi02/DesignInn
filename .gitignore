@@ -1,0 +1,46 @@
+# Root .gitignore for DesignInn Project
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-workspace
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Dependencies
+node_modules/
+venv/
+env/
+.venv/
+__pycache__/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build & Dist
+dist/
+build/
+*.egg-info/
+
+# Database
+*.db
+*.sqlite3
+db.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Misc
+.pytest_cache/
+.coverage
+htmlcov/
+
