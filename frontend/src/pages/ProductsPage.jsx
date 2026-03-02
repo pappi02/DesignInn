@@ -1,8 +1,11 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { FiFilter, FiSearch, FiX, FiChevronDown } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { useAuthStore } from '../../stores'
+import { productsAPI } from '../../api'
+import { useAPIData } from '../../hooks/useAPILoading'
+import { LoadingSkeleton, LoadingSpinner } from '../../components/Loading/GlobalLoadingIndicator'
 
 /**
  * ProductsPage - Product catalog with filtering and search
@@ -23,63 +26,43 @@ function ProductsPage() {
 
   // Filter states
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
-  const [products] = useState(MOCK_PRODUCTS) // Replace with API call
-  const [loading, setLoading] = useState(false)
 
   // Search and filter values from URL
   const searchQuery = searchParams.get('search') || ''
   const selectedCategory = searchParams.get('category') || 'all'
-  const selectedSort = searchParams.get('sort') || 'name'
+  const selectedSort = searchParams.get('sort') || 'created_at'
   const priceRange = searchParams.get('price') || 'all'
   const currentPage = parseInt(searchParams.get('page') || '1')
 
-  // Filter and search products
-  const filteredProducts = useMemo(() => {
-    let filtered = [...products]
-
-    // Search filter
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.description.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+  // Parse price range for API
+  const getPriceParams = useCallback(() => {
+    if (priceRange === 'all') return { minPrice: '', maxPrice: '' }
+    const [min, max] = priceRange.split('-').map(Number)
+    return {
+      minPrice: min,
+      maxPrice: max === 999999 ? '' : max,
     }
+  }, [priceRange])
 
-    // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter((p) => p.category === selectedCategory)
-    }
-
-    // Price filter
-    if (priceRange !== 'all') {
-      filtered = filtered.filter((p) => {
-        const [min, max] = priceRange.split('-').map(Number)
-        return p.price >= min && (max ? p.price <= max : true)
-      })
-    }
-
-    // Sort
-    if (selectedSort === 'price-low') {
-      filtered.sort((a, b) => a.price - b.price)
-    } else if (selectedSort === 'price-high') {
-      filtered.sort((a, b) => b.price - a.price)
-    } else if (selectedSort === 'rating') {
-      filtered.sort((a, b) => b.rating - a.rating)
-    } else if (selectedSort === 'newest') {
-      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    }
-
-    return filtered
-  }, [products, searchQuery, selectedCategory, priceRange, selectedSort])
-
-  // Pagination
-  const itemsPerPage = 12
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  // Fetch products from API
+  const { data: apiResponse, isLoading, error, refetch } = useAPIData(
+    () =>
+      productsAPI.list({
+        page: currentPage,
+        limit: 12,
+        search: searchQuery,
+        category: selectedCategory !== 'all' ? selectedCategory : '',
+        sortBy: selectedSort,
+        ...getPriceParams(),
+      }),
+    [currentPage, searchQuery, selectedCategory, selectedSort, priceRange]
   )
+
+  // Extract products and pagination info from API response
+  const products = apiResponse?.data || apiResponse || []
+  const totalCount = apiResponse?.totalCount || 0
+  const totalPages = apiResponse?.totalPages || 1
+  const paginatedProducts = Array.isArray(products) ? products : []
 
   const handleSearch = (value) => {
     const newParams = new URLSearchParams(searchParams)
@@ -147,10 +130,15 @@ function ProductsPage() {
       {/* Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-4xl font-bold text-black mb-4">Products</h1>
-        <p className="text-gray-600">
-          Showing {paginatedProducts.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{' '}
-          {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
-        </p>
+        {error ? (
+          <p className="text-red-600">Error loading products. Please try again.</p>
+        ) : (
+          <p className="text-gray-600">
+            {isLoading
+              ? 'Loading products...'
+              : `Showing ${paginatedProducts.length > 0 ? (currentPage - 1) * 12 + 1 : 0} to ${Math.min(currentPage * 12, totalCount)} of ${totalCount} products`}
+          </p>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -234,12 +222,31 @@ function ProductsPage() {
             )}
 
             {/* Products Grid */}
-            {paginatedProducts.length > 0 ? (
+            {isLoading ? (
+              <div>
+                <LoadingSkeleton rows={2} columns={3} />
+                <div className="mt-4">
+                  <LoadingSkeleton rows={1} columns={5} />
+                </div>
+              </div>
+            ) : error ? (
+              <div className="text-center py-16">
+                <p className="text-red-600 text-lg mb-4">
+                  Failed to load products. Please try again.
+                </p>
+                <button
+                  onClick={() => refetch()}
+                  className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : paginatedProducts.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
                   {paginatedProducts.map((product) => (
                     <ProductCard
-                      key={product.id}
+                      key={product.id || product.slug}
                       product={product}
                       onViewDetails={handleViewProduct}
                       onAddToCart={handleAddToCart}
@@ -259,7 +266,7 @@ function ProductsPage() {
                       </button>
                     )}
 
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((page) => (
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
@@ -384,62 +391,76 @@ function FilterPanel({
  * ProductCard Component - Individual product display
  */
 function ProductCard({ product, onViewDetails, onAddToCart }) {
+  // Handle both mock data and API data
+  const productId = product.id || product.slug
+  const productName = product.name || product.title || 'Unnamed Product'
+  const price = product.price || 0
+  const rating = product.rating || product.average_rating || 0
+  const reviews = product.reviews || product.review_count || 0
+  const category = product.category || 'General'
+  const description = product.description || ''
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition">
       {/* Image */}
       <div
         className="h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center cursor-pointer group"
-        onClick={() => onViewDetails(product.id)}
+        onClick={() => onViewDetails(productId)}
       >
-        <div className="text-center group-hover:scale-110 transition-transform">
-          <p className="text-gray-500">{product.name}</p>
-        </div>
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={productName}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+          />
+        ) : (
+          <div className="text-center group-hover:scale-110 transition-transform">
+            <p className="text-gray-500 text-sm">{productName}</p>
+          </div>
+        )}
       </div>
 
       {/* Content */}
       <div className="p-4">
         {/* Category Badge */}
         <div className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded mb-2">
-          {product.category}
+          {typeof category === 'object' ? category.name : category}
         </div>
 
         {/* Name */}
         <h3
-          className="font-semibold text-black mb-2 cursor-pointer hover:text-yellow-600 transition"
-          onClick={() => onViewDetails(product.id)}
+          className="font-semibold text-black mb-2 cursor-pointer hover:text-yellow-600 transition line-clamp-2"
+          onClick={() => onViewDetails(productId)}
         >
-          {product.name}
+          {productName}
         </h3>
 
         {/* Rating */}
         <div className="flex items-center space-x-1 mb-3">
-          <div className="flex text-yellow-400">
+          <div className="flex text-yellow-400 text-sm">
             {Array.from({ length: 5 }, (_, i) => (
-              <span key={i}>{i < Math.round(product.rating) ? '★' : '☆'}</span>
+              <span key={i}>{i < Math.round(rating) ? '★' : '☆'}</span>
             ))}
           </div>
-          <span className="text-sm text-gray-600">({product.reviews})</span>
+          <span className="text-sm text-gray-600">({reviews})</span>
         </div>
 
         {/* Price */}
         <div className="mb-4">
-          <p className="text-2xl font-bold text-black">${product.price.toFixed(2)}</p>
-          {product.originalPrice && (
-            <p className="text-sm text-gray-500 line-through">${product.originalPrice.toFixed(2)}</p>
-          )}
+          <p className="text-2xl font-bold text-black">${parseFloat(price).toFixed(2)}</p>
         </div>
 
         {/* Buttons */}
         <div className="space-y-2">
           <button
-            onClick={() => onViewDetails(product.id)}
-            className="w-full bg-white border-2 border-black text-black py-2 rounded-lg hover:bg-black hover:text-white transition font-semibold"
+            onClick={() => onViewDetails(productId)}
+            className="w-full bg-white border-2 border-black text-black py-2 rounded-lg hover:bg-black hover:text-white transition font-semibold text-sm"
           >
             View Details
           </button>
           <button
             onClick={() => onAddToCart(product)}
-            className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition font-semibold"
+            className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition font-semibold text-sm"
           >
             Add to Cart
           </button>
@@ -450,153 +471,6 @@ function ProductCard({ product, onViewDetails, onAddToCart }) {
 }
 
 // Mock data - Replace with API call
-const MOCK_PRODUCTS = [
-  {
-    id: 1,
-    name: 'Premium Marble Desk',
-    description: 'Elegant marble top desk with steel frame',
-    category: 'furniture',
-    price: 1299.99,
-    originalPrice: 1499.99,
-    rating: 4.5,
-    reviews: 124,
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 2,
-    name: 'Modern LED Pendant Light',
-    description: 'Contemporary pendant lighting for any space',
-    category: 'lighting',
-    price: 249.99,
-    rating: 4.8,
-    reviews: 89,
-    createdAt: new Date(),
-  },
-  {
-    id: 3,
-    name: 'Minimalist Wall Mirror',
-    description: 'Sleek wall-mounted mirror with frame',
-    category: 'decor',
-    price: 179.99,
-    rating: 4.3,
-    reviews: 56,
-    createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 4,
-    name: 'Wooden Flooring Sample Pack',
-    description: 'Premium hardwood samples with 4 options',
-    category: 'flooring',
-    price: 89.99,
-    rating: 4.6,
-    reviews: 42,
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 5,
-    name: 'Luxury Sectional Sofa',
-    description: 'Spacious sectional with premium upholstery',
-    category: 'furniture',
-    price: 2499.99,
-    originalPrice: 2999.99,
-    rating: 4.7,
-    reviews: 203,
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 6,
-    name: 'Crystal Chandelier',
-    description: 'Elegant crystal chandelier for dining rooms',
-    category: 'lighting',
-    price: 599.99,
-    rating: 5.0,
-    reviews: 78,
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 7,
-    name: 'Abstract Wall Art Set',
-    description: 'Set of 3 modern abstract paintings',
-    category: 'decor',
-    price: 349.99,
-    originalPrice: 449.99,
-    rating: 4.4,
-    reviews: 67,
-    createdAt: new Date(),
-  },
-  {
-    id: 8,
-    name: 'Luxury Tile Collection',
-    description: 'Premium porcelain tiles in multiple finishes',
-    category: 'flooring',
-    price: 129.99,
-    rating: 4.5,
-    reviews: 93,
-    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 9,
-    name: 'Ergonomic Office Chair',
-    description: 'Comfortable chair with lumbar support',
-    category: 'furniture',
-    price: 449.99,
-    rating: 4.6,
-    reviews: 156,
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 10,
-    name: 'Smart Ceiling Light',
-    description: 'IoT enabled ceiling light with color options',
-    category: 'lighting',
-    price: 199.99,
-    rating: 4.2,
-    reviews: 45,
-    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 11,
-    name: 'Decorative Floor Lamp',
-    description: 'Modern arc floor lamp with dimming',
-    category: 'lighting',
-    price: 279.99,
-    originalPrice: 349.99,
-    rating: 4.7,
-    reviews: 112,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 12,
-    name: 'Ceramic Vase Collection',
-    description: 'Set of 4 handcrafted ceramic vases',
-    category: 'decor',
-    price: 199.99,
-    rating: 4.9,
-    reviews: 34,
-    createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 13,
-    name: 'Coffee Table - Wood',
-    description: 'Rustic wooden coffee table with storage',
-    category: 'furniture',
-    price: 399.99,
-    rating: 4.5,
-    reviews: 78,
-    createdAt: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 14,
-    name: 'Vinyl Flooring Roll',
-    description: 'Waterproof vinyl with modern design',
-    category: 'flooring',
-    price: 79.99,
-    rating: 4.3,
-    reviews: 61,
-    createdAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
-  },
-]
-
 const CATEGORIES = [
   { label: 'All Categories', value: 'all' },
   { label: 'Furniture', value: 'furniture' },

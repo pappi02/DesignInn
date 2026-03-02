@@ -3,7 +3,6 @@ Product models for merchandise, merchandise variants, and categories
 """
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator
 from common.utils import TimestampedModel
 from common.validators import validate_file_size, validate_file_type

@@ -2,6 +2,9 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiSearch, FiFilter, FiEye, FiDownload } from 'react-icons/fi'
 import { useAuthStore } from '../../stores'
+import { ordersAPI } from '../api'
+import { useAPIData } from '../hooks/useAPILoading'
+import { LoadingSpinner } from '../components/Loading/GlobalLoadingIndicator'
 
 /**
  * OrdersPage - User order history and management
@@ -20,8 +23,17 @@ function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState('date-desc')
 
-  // Mock orders data
-  const [orders] = useState(MOCK_ORDERS)
+  // Fetch user's orders from API
+  const { data: apiResponse, isLoading, error, refetch } = useAPIData(
+    () => ordersAPI.getMyOrders({
+      status: statusFilter !== 'all' ? statusFilter : '',
+      sortBy: sortBy.startsWith('date') ? 'createdAt' : 'total',
+      sortOrder: sortBy.includes('-desc') ? 'desc' : 'asc',
+    }),
+    [statusFilter, sortBy]
+  )
+
+  const orders = apiResponse?.data || []
 
   // Filter and search orders
   const filteredOrders = useMemo(() => {
@@ -31,31 +43,15 @@ function OrdersPage() {
     if (searchQuery) {
       filtered = filtered.filter(
         (order) =>
-          order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          order.items.some((item) =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+          (order.id || order.number || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (order.items || []).some((item) =>
+            (item.name || item.productName || '').toLowerCase().includes(searchQuery.toLowerCase())
           )
       )
     }
 
-    // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter((order) => order.status === statusFilter)
-    }
-
-    // Sort
-    if (sortBy === 'date-desc') {
-      filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
-    } else if (sortBy === 'date-asc') {
-      filtered.sort((a, b) => new Date(a.date) - new Date(b.date))
-    } else if (sortBy === 'total-high') {
-      filtered.sort((a, b) => b.total - a.total)
-    } else if (sortBy === 'total-low') {
-      filtered.sort((a, b) => a.total - b.total)
-    }
-
     return filtered
-  }, [orders, searchQuery, statusFilter, sortBy])
+  }, [orders, searchQuery])
 
   const handleViewOrder = (orderId) => {
     navigate(`/orders/${orderId}`)
@@ -84,6 +80,28 @@ function OrdersPage() {
   if (!token) {
     navigate('/auth/login')
     return null
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <p className="text-xl text-gray-600 mb-4">Error loading orders: {error.message || 'Please try again'}</p>
+        <button
+          onClick={refetch}
+          className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-semibold"
+        >
+          Retry
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -160,14 +178,14 @@ function OrdersPage() {
                   {/* Order ID */}
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Order ID</p>
-                    <p className="font-semibold text-black">{order.id}</p>
+                    <p className="font-semibold text-black">{order.id || order.number || 'N/A'}</p>
                   </div>
 
                   {/* Date */}
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Date</p>
                     <p className="font-semibold text-black">
-                      {new Date(order.date).toLocaleDateString()}
+                      {new Date(order.createdAt || order.date).toLocaleDateString()}
                     </p>
                   </div>
 
@@ -175,14 +193,14 @@ function OrdersPage() {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Status</p>
                     <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      {(order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1)}
                     </span>
                   </div>
 
                   {/* Total */}
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Total</p>
-                    <p className="font-semibold text-black text-lg">${order.total.toFixed(2)}</p>
+                    <p className="font-semibold text-black text-lg">${parseFloat(order.total || order.amount || 0).toFixed(2)}</p>
                   </div>
 
                   {/* Actions */}
@@ -207,12 +225,12 @@ function OrdersPage() {
                 <div className="pt-4 border-t">
                   <p className="text-sm text-gray-600 mb-2">Items:</p>
                   <div className="flex flex-wrap gap-2">
-                    {order.items.slice(0, 3).map((item, idx) => (
+                    {(order.items || []).slice(0, 3).map((item, idx) => (
                       <span key={idx} className="bg-gray-50 px-3 py-1 rounded text-sm text-gray-700">
-                        {item.name} ({item.quantity})
+                        {item.name || item.productName || 'Item'} ({item.quantity || 1})
                       </span>
                     ))}
-                    {order.items.length > 3 && (
+                    {(order.items && order.items.length > 3) && (
                       <span className="bg-gray-50 px-3 py-1 rounded text-sm text-gray-700">
                         +{order.items.length - 3} more
                       </span>
@@ -237,53 +255,5 @@ function OrdersPage() {
     </div>
   )
 }
-
-// Mock orders data
-const MOCK_ORDERS = [
-  {
-    id: 'ORD-001234',
-    date: '2024-01-15',
-    status: 'completed',
-    total: 1599.99,
-    items: [
-      { name: 'Premium Marble Desk', quantity: 1 },
-      { name: 'Ergonomic Office Chair', quantity: 1 },
-    ],
-  },
-  {
-    id: 'ORD-001233',
-    date: '2024-01-10',
-    status: 'completed',
-    total: 349.95,
-    items: [
-      { name: 'Abstract Wall Art Set', quantity: 1 },
-      { name: 'Ceramic Vase Collection', quantity: 1 },
-    ],
-  },
-  {
-    id: 'ORD-001232',
-    date: '2024-01-05',
-    status: 'processing',
-    total: 249.99,
-    items: [{ name: 'Modern LED Pendant Light', quantity: 1 }],
-  },
-  {
-    id: 'ORD-001231',
-    date: '2023-12-28',
-    status: 'completed',
-    total: 879.99,
-    items: [
-      { name: 'Luxury Sectional Sofa', quantity: 1 },
-      { name: 'Coffee Table - Wood', quantity: 1 },
-    ],
-  },
-  {
-    id: 'ORD-001230',
-    date: '2023-12-20',
-    status: 'cancelled',
-    total: 199.99,
-    items: [{ name: 'Minimalist Wall Mirror', quantity: 1 }],
-  },
-]
 
 export default OrdersPage

@@ -26,6 +26,39 @@ import OrdersPage from './pages/OrdersPage'
 import SettingsPage from './pages/SettingsPage'
 import AddressBookPage from './pages/AddressBookPage'
 
+// Shopping Pages - Phase 2.9
+import WishlistPage from './pages/WishlistPage'
+import ProductComparisonPage from './pages/ProductComparisonPage'
+
+// Admin Pages - Phase 2.10
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminProductsPage from './pages/admin/AdminProductsPage'
+import AdminOrdersPage from './pages/admin/AdminOrdersPage'
+import AdminUsersPage from './pages/admin/AdminUsersPage'
+import AdminSettingsPage from './pages/admin/AdminSettingsPage'
+
+// Admin Pages - Phase 2.11 Step 3
+import AnalyticsPage from './pages/admin/AnalyticsPage'
+
+/**
+ * AdminProtectedRoute Component
+ * Ensures user is authenticated and has admin role
+ */
+function AdminProtectedRoute({ children }) {
+  const { user, token } = useAuthStore()
+
+  if (!token) {
+    return <LoginPage />
+  }
+
+  if (user?.role !== 'admin') {
+    return <NotFoundPage />
+  }
+
+  return children
+}
+
 function App() {
   const { initializeAuth } = useAuthStore()
 
@@ -126,6 +159,88 @@ function App() {
               <AddressBookPage />
             </ProtectedRoute>
           </MainLayout>
+        }
+      />
+
+      {/* Shopping Pages - Phase 2.9 */}
+      <Route
+        path="/wishlist"
+        element={
+          <MainLayout>
+            <ProtectedRoute>
+              <WishlistPage />
+            </ProtectedRoute>
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/compare"
+        element={
+          <MainLayout>
+            <ProductComparisonPage />
+          </MainLayout>
+        }
+      />
+
+      {/* Admin Pages - Phase 2.10 - Protected Routes with Admin Role Check */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <AdminLayout>
+            <AdminProtectedRoute>
+              <AdminDashboard />
+            </AdminProtectedRoute>
+          </AdminLayout>
+        }
+      />
+      <Route
+        path="/admin/products"
+        element={
+          <AdminLayout>
+            <AdminProtectedRoute>
+              <AdminProductsPage />
+            </AdminProtectedRoute>
+          </AdminLayout>
+        }
+      />
+      <Route
+        path="/admin/orders"
+        element={
+          <AdminLayout>
+            <AdminProtectedRoute>
+              <AdminOrdersPage />
+            </AdminProtectedRoute>
+          </AdminLayout>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <AdminLayout>
+            <AdminProtectedRoute>
+              <AdminUsersPage />
+            </AdminProtectedRoute>
+          </AdminLayout>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <AdminLayout>
+            <AdminProtectedRoute>
+              <AdminSettingsPage />
+            </AdminProtectedRoute>
+          </AdminLayout>
+        }
+      />
+      <Route
+        path="/admin/analytics"
+        element={
+          <AdminLayout>
+            <AdminProtectedRoute>
+              <AnalyticsPage />
+            </AdminProtectedRoute>
+          </AdminLayout>
         }
       />
 

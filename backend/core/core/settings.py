@@ -34,13 +34,13 @@ INSTALLED_APPS = [
     'cloudinary',
 
     # Local apps
-    'users.apps.UsersConfig',
-    'products.apps.ProductsConfig',
-    'orders.apps.OrdersConfig',
-    'quotes.apps.QuotesConfig',
-    'portfolio.apps.PortfolioConfig',
-    'services.apps.ServicesConfig',
-    'common.apps.CommonConfig',
+    'users',
+    'products',
+    'orders',
+    'quotes',
+    'portfolio',
+    'services',
+    'common',
 ]
 
 MIDDLEWARE = [

@@ -91,6 +91,61 @@ export const ENDPOINTS = {
     UPDATE: (slug) => `/services/${slug}/`,
     DELETE: (slug) => `/services/${slug}/`,
   },
+
+  // Users (Admin)
+  USERS: {
+    LIST: '/users/',
+    DETAIL: (id) => `/users/${id}/`,
+    UPDATE: (id) => `/users/${id}/`,
+    DELETE: (id) => `/users/${id}/`,
+    UPDATE_ROLE: (id) => `/users/${id}/update_role/`,
+    UPDATE_STATUS: (id) => `/users/${id}/update_status/`,
+    STATS: '/users/stats/',
+  },
+
+  // Settings (Admin)
+  SETTINGS: {
+    GET: '/admin/settings/',
+    UPDATE: '/admin/settings/',
+    EMAIL_TEMPLATES: '/admin/email_templates/',
+    EMAIL_TEMPLATE_DETAIL: (id) => `/admin/email_templates/${id}/`,
+    UPDATE_TEMPLATE: (id) => `/admin/email_templates/${id}/`,
+    API_KEYS: '/admin/api_keys/',
+    GENERATE_API_KEY: '/admin/api_keys/generate/',
+    DELETE_API_KEY: (id) => `/admin/api_keys/${id}/`,
+    SYSTEM_STATS: '/admin/stats/',
+  },
+
+  // Reviews
+  REVIEWS: {
+    LIST: '/reviews/',
+    CREATE: '/reviews/',
+    UPDATE: (id) => `/reviews/${id}/`,
+    DELETE: (id) => `/reviews/${id}/`,
+  },
+
+  // Wishlist
+  WISHLIST: {
+    LIST: '/wishlist/',
+    ADD: '/wishlist/',
+    REMOVE: (id) => `/wishlist/${id}/`,
+    TOGGLE: (id) => `/wishlist/${id}/toggle/`,
+  },
+
+  // Analytics & Reporting (Admin)
+  ANALYTICS: {
+    METRICS: '/analytics/metrics/',
+    REVENUE_TRENDS: '/analytics/revenue_trends/',
+    ORDER_ANALYTICS: '/analytics/orders/',
+    USER_ANALYTICS: '/analytics/users/',
+    PRODUCT_PERFORMANCE: '/analytics/products/performance/',
+    CUSTOMER_SEGMENTS: '/analytics/customers/segments/',
+    CONVERSION_FUNNEL: '/analytics/conversion_funnel/',
+    TOP_PRODUCTS: '/analytics/products/top/',
+    TRAFFIC_SOURCES: '/analytics/traffic_sources/',
+    EXPORT: '/analytics/export/',
+    CUSTOM_REPORT: (type) => `/analytics/reports/${type}/`,
+  },
 };
 
 // HTTP Status Codes

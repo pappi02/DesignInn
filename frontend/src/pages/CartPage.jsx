@@ -2,6 +2,9 @@ import { useNavigate } from 'react-router-dom'
 import { FiX, FiArrowRight, FiTrendingUp } from 'react-icons/fi'
 import { useCartStore } from '../../stores'
 import { useAuthStore } from '../../stores'
+import { productsAPI } from '../api'
+import { useAPIData } from '../hooks/useAPILoading'
+import { LoadingSkeleton } from '../components/Loading/GlobalLoadingIndicator'
 
 /**
  * CartPage - Shopping cart view
@@ -17,6 +20,14 @@ function CartPage() {
   const navigate = useNavigate()
   const { token } = useAuthStore()
   const { items, removeItem, updateQuantity, total, itemCount, isEmpty } = useCartStore()
+
+  // Fetch suggested products from API
+  const { data: suggestedResponse, isLoading: suggestedLoading } = useAPIData(
+    () => productsAPI.getFeatured({ limit: 4 }),
+    []
+  )
+
+  const suggestedProducts = suggestedResponse?.data || []
 
   const handleCheckout = () => {
     if (!token) {
@@ -153,30 +164,50 @@ function CartPage() {
         {/* Suggested Products */}
         <div className="mt-16 pt-16 border-t">
           <h2 className="text-3xl font-bold text-black mb-8">You might also like</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {SUGGESTED_PRODUCTS.map((product) => (
-              <div
-                key={product.id}
-                className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition cursor-pointer"
-                onClick={() => navigate(`/products/${product.id}`)}
-              >
-                <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300" />
-                <div className="p-4">
-                  <h4 className="font-semibold text-black mb-2">{product.name}</h4>
-                  <p className="text-xl font-bold text-black">${product.price.toFixed(2)}</p>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // TODO: Add to cart
-                    }}
-                    className="w-full mt-4 bg-black text-white py-2 rounded text-sm hover:bg-gray-800 transition font-semibold"
+          {suggestedLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <LoadingSkeleton key={i} height="300px" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {suggestedProducts.length > 0 ? (
+                suggestedProducts.map((product) => (
+                  <div
+                    key={product.id || product.slug}
+                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition cursor-pointer"
+                    onClick={() => navigate(`/products/${product.slug || product.id}`)}
                   >
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                    <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300">
+                      {product.image && (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-semibold text-black mb-2 line-clamp-2">{product.name || product.title}</h4>
+                      <p className="text-xl font-bold text-black">${parseFloat(product.price || 0).toFixed(2)}</p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          // TODO: Integrate with cart store add to cart
+                        }}
+                        className="w-full mt-4 bg-black text-white py-2 rounded text-sm hover:bg-gray-800 transition font-semibold"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="col-span-full text-gray-600 text-center py-8">No suggested products available</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -230,12 +261,5 @@ function CartItem({ item, onRemove, onQuantityChange }) {
     </div>
   )
 }
-
-const SUGGESTED_PRODUCTS = [
-  { id: 101, name: 'Desk Organizer', price: 49.99 },
-  { id: 102, name: 'Monitor Stand', price: 79.99 },
-  { id: 103, name: 'Desk Lamp', price: 129.99 },
-  { id: 104, name: 'Office Rug', price: 199.99 },
-]
 
 export default CartPage
