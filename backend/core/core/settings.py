@@ -121,6 +121,9 @@ MEDIA_ROOT = BASE_DIR / config('MEDIA_ROOT', default='media')
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# ===== CUSTOM USER MODEL =====
+AUTH_USER_MODEL = 'users.User'
+
 # ===== CLOUDINARY CONFIGURATION =====
 import cloudinary
 

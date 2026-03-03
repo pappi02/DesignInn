@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../../stores'
+import { useAuthStore } from '../stores'
 import { FiArrowRight, FiCheck, FiSmartphone, FiAward, FiTrendingUp } from 'react-icons/fi'
 
 /**

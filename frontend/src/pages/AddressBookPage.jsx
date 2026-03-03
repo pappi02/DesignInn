@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiPlus, FiEdit2, FiTrash2, FiCheck } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { useForm } from '../../hooks'
+import { useForm } from '../hooks'
 
 /**
  * AddressBookPage - Manage multiple delivery addresses

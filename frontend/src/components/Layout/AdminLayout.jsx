@@ -12,7 +12,7 @@
 
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { FiMenu, FiX, FiLogOut, FiUser, FiHome, FiPackage, FiShoppingCart, FiUsers, FiBarChart3, FiSettings } from 'react-icons/fi'
+import { FiMenu, FiX, FiLogOut, FiUser, FiHome, FiPackage, FiShoppingCart, FiUsers, FiBarChart, FiSettings } from 'react-icons/fi'
 import { useAuthStore } from '../../stores'
 import { toast } from 'react-toastify'
 import { useResponsive, useSafeArea } from '../../hooks/usePWA'
@@ -56,7 +56,7 @@ function AdminLayout({ children }) {
   // Navigation items
   const navItems = [
     { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
-    { icon: FiBarChart3, label: 'Analytics', path: '/admin/analytics' },
+    { icon: FiBarChart, label: 'Analytics', path: '/admin/analytics' },
     { icon: FiPackage, label: 'Products', path: '/admin/products' },
     { icon: FiShoppingCart, label: 'Orders', path: '/admin/orders' },
     { icon: FiUsers, label: 'Users', path: '/admin/users' },

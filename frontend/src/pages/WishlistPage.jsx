@@ -16,7 +16,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import MainLayout from '@/components/Layouts/MainLayout';
+import MainLayout from '@/components/Layout/MainLayout';
 import { useWishlistStore } from '@/stores';
 import { useAPILoading } from '@/hooks';
 import { cartStore } from '@/stores';

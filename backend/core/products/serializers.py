@@ -170,4 +170,3 @@ class ProductVariantCreateUpdateSerializer(serializers.ModelSerializer):
             if ProductVariant.objects.filter(sku=value).exists():
                 raise serializers.ValidationError('SKU already exists.')
         return value
-        ]

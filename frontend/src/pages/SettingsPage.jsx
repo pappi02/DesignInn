@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiLock, FiBell, FiShield, FiLogOut, FiTrash2 } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { useAuthStore } from '../../stores'
-import { useForm } from '../../hooks'
+import { useAuthStore } from '../stores'
+import { useForm } from '../hooks'
 
 /**
  * SettingsPage - User account settings and preferences

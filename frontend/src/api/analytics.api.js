@@ -3,7 +3,7 @@
  * Handles all analytics and reporting data
  */
 
-import API from './api'
+import apiClient from './client'
 import { ENDPOINTS } from './endpoints'
 
 /**
@@ -17,7 +17,7 @@ export const analyticsAPI = {
    */
   async getMetrics(params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.METRICS, { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.METRICS, { params })
       return response.data
     } catch (error) {
       console.error('Error fetching metrics:', error)
@@ -35,7 +35,7 @@ export const analyticsAPI = {
    */
   async getRevenueTrends(params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.REVENUE_TRENDS, { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.REVENUE_TRENDS, { params })
       return response.data
     } catch (error) {
       console.error('Error fetching revenue trends:', error)
@@ -53,7 +53,7 @@ export const analyticsAPI = {
    */
   async getOrderAnalytics(params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.ORDER_ANALYTICS, { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.ORDER_ANALYTICS, { params })
       return response.data
     } catch (error) {
       console.error('Error fetching order analytics:', error)
@@ -71,7 +71,7 @@ export const analyticsAPI = {
    */
   async getUserAnalytics(params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.USER_ANALYTICS, { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.USER_ANALYTICS, { params })
       return response.data
     } catch (error) {
       console.error('Error fetching user analytics:', error)
@@ -89,7 +89,7 @@ export const analyticsAPI = {
    */
   async getProductPerformance(params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.PRODUCT_PERFORMANCE, { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.PRODUCT_PERFORMANCE, { params })
       return response.data
     } catch (error) {
       console.error('Error fetching product performance:', error)
@@ -106,7 +106,7 @@ export const analyticsAPI = {
    */
   async getCustomerSegments() {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.CUSTOMER_SEGMENTS)
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.CUSTOMER_SEGMENTS)
       return response.data
     } catch (error) {
       console.error('Error fetching customer segments:', error)
@@ -125,7 +125,7 @@ export const analyticsAPI = {
    */
   async exportData(format, params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.EXPORT, {
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.EXPORT, {
         params: { format, ...params },
         responseType: format === 'pdf' ? 'blob' : 'json',
       })
@@ -149,7 +149,7 @@ export const analyticsAPI = {
    */
   async getConversionFunnel(params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.CONVERSION_FUNNEL, { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.CONVERSION_FUNNEL, { params })
       return response.data
     } catch (error) {
       console.error('Error fetching conversion funnel:', error)
@@ -167,7 +167,7 @@ export const analyticsAPI = {
    */
   async getTopProducts(params = { limit: 10, period: '30' }) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.TOP_PRODUCTS, { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.TOP_PRODUCTS, { params })
       return response.data
     } catch (error) {
       console.error('Error fetching top products:', error)
@@ -185,7 +185,7 @@ export const analyticsAPI = {
    */
   async getTrafficSources(params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.TRAFFIC_SOURCES, { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.TRAFFIC_SOURCES, { params })
       return response.data
     } catch (error) {
       console.error('Error fetching traffic sources:', error)
@@ -204,7 +204,7 @@ export const analyticsAPI = {
    */
   async getCustomReport(reportType, params = {}) {
     try {
-      const response = await API.get(ENDPOINTS.ANALYTICS.CUSTOM_REPORT(reportType), { params })
+      const response = await apiClient.get(ENDPOINTS.ANALYTICS.CUSTOM_REPORT(reportType), { params })
       return response.data
     } catch (error) {
       console.error(`Error fetching ${reportType} report:`, error)

@@ -2,10 +2,10 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { FiFilter, FiSearch, FiX, FiChevronDown } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { useAuthStore } from '../../stores'
-import { productsAPI } from '../../api'
-import { useAPIData } from '../../hooks/useAPILoading'
-import { LoadingSkeleton, LoadingSpinner } from '../../components/Loading/GlobalLoadingIndicator'
+import { useAuthStore } from '../stores'
+import { productsAPI } from '../api'
+import { useAPIData } from '../hooks/useAPILoading'
+import { LoadingSkeleton, LoadingSpinner } from '../components/Loading/GlobalLoadingIndicator'
 
 /**
  * ProductsPage - Product catalog with filtering and search

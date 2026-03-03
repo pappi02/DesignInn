@@ -10,6 +10,7 @@
 // Client configuration and interceptors
 export { default as apiClient, loadingState, API_CONFIG, logger } from './client';
 
+
 // Authentication API
 export { authAPI } from './auth.api';
 
@@ -55,11 +56,11 @@ export {
  * Usage: API.products.list(), API.orders.create(), etc.
  */
 export const API = {
-  auth: require('./auth.api').authAPI,
-  products: require('./products.api').productsAPI,
-  orders: require('./orders.api').ordersAPI,
-  users: require('./users.api').usersAPI,
-  settings: require('./settings.api').settingsAPI,
-  wishlist: require('./wishlist.api').wishlistAPI,
-  reviews: require('./reviews.api').reviewsAPI,
+  auth: authAPI,
+  products: productsAPI,
+  orders: ordersAPI,
+  users: usersAPI,
+  settings: settingsAPI,
+  wishlist: wishlistAPI,
+  reviews: reviewsAPI,
 };

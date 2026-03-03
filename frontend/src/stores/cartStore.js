@@ -6,7 +6,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export const useCartStore = create(
+const useCartStore = create(
   persist(
     (set, get) => ({
       // State
@@ -146,5 +146,9 @@ export const useCartStore = create(
     }
   )
 );
+
+// Export both the hook and the store instance
+export { useCartStore };
+export const cartStore = useCartStore;
 
 export default useCartStore;

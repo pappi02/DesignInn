@@ -31,7 +31,7 @@ import WishlistPage from './pages/WishlistPage'
 import ProductComparisonPage from './pages/ProductComparisonPage'
 
 // Admin Pages - Phase 2.10
-import AdminLayout from './pages/admin/AdminLayout'
+import AdminLayout from './components/Layout/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminProductsPage from './pages/admin/AdminProductsPage'
 import AdminOrdersPage from './pages/admin/AdminOrdersPage'
@@ -335,50 +335,6 @@ function NotFoundPage() {
         >
           Go Home
         </a>
-      </div>
-    </div>
-  )
-}
-
-/**
- * HomePage - Temporary landing page showing app status
- * To be replaced in Phase 2.3 with real landing page
- */
-function HomePage() {
-  const { user, token } = useAuthStore()
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-gray-900">
-      <div className="text-center text-white p-8">
-        <h1 className="text-5xl font-bold mb-6 text-yellow-600">DesignInn</h1>
-        <p className="text-xl mb-8 text-gray-300">Creative Design Solutions</p>
-
-        {token ? (
-          <div className="space-y-4">
-            <p className="text-lg">Welcome back, {user?.first_name || 'User'}!</p>
-            <p className="text-gray-400 mb-6">Authentication verified. Product pages coming next.</p>
-            <div className="loader mx-auto mb-6"></div>
-            <a href="/auth/verify-email" className="text-yellow-600 hover:text-yellow-500 text-sm">
-              Complete your email verification
-            </a>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-gray-400 mb-8">
-              Welcome to DesignInn. Authentication system is ready.
-            </p>
-            <div className="space-x-4">
-              <a href="/auth/login" className="btn-primary inline-block">Login</a>
-              <a href="/auth/register" className="btn-secondary inline-block">Register</a>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-12 text-gray-500 text-sm space-y-1">
-          <p>✅ Phase 2.1: Foundation (API, Stores, Hooks)</p>
-          <p>✅ Phase 2.2: Authentication Pages (Login, Register, Forgot Password, Email Verification, Profile Completion)</p>
-          <p>🚀 Phase 2.3: Layout & Navigation (Header, Footer, MainLayout)</p>
-        </div>
       </div>
     </div>
   )

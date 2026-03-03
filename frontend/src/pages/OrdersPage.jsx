@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiSearch, FiFilter, FiEye, FiDownload } from 'react-icons/fi'
-import { useAuthStore } from '../../stores'
+import { useAuthStore } from '../stores'
 import { ordersAPI } from '../api'
 import { useAPIData } from '../hooks/useAPILoading'
 import { LoadingSpinner } from '../components/Loading/GlobalLoadingIndicator'

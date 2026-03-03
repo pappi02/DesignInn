@@ -16,18 +16,25 @@ Endpoints:
 - GET /api/v1/products/variants/ - List variants (admin)
 - GET /api/v1/products/images/ - List product images (admin)
 """
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    CategoryViewSet, ProductViewSet, ProductVariantViewSet, ProductImageViewSet
+    CategoryViewSet,
+    ProductViewSet,
+    ProductVariantViewSet,
+    ProductImageViewSet,
 )
 
+# 🔹 REQUIRED for namespacing
+app_name = "products"
+
 router = DefaultRouter()
-router.register(r'categories', CategoryViewSet, basename='category')
-router.register(r'variants', ProductVariantViewSet, basename='product-variant')
-router.register(r'images', ProductImageViewSet, basename='product-image')
-router.register(r'', ProductViewSet, basename='product')
+router.register(r"categories", CategoryViewSet, basename="category")
+router.register(r"variants", ProductVariantViewSet, basename="product-variant")
+router.register(r"images", ProductImageViewSet, basename="product-image")
+router.register(r"", ProductViewSet, basename="product")
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiCheck, FiLock } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { useAuthStore, useCartStore } from '../../stores'
-import { useForm } from '../../hooks'
+import { useAuthStore, useCartStore } from '../stores'
+import { useForm } from '../hooks'
 
 /**
  * CheckoutPage - Order checkout and payment

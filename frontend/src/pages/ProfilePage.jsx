@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiEdit2, FiSave, FiX, FiCamera, FiArrowLeft } from 'react-icons/fi'
 import { toast } from 'react-toastify'
-import { useAuthStore } from '../../stores'
-import { useForm } from '../../hooks'
+import { useAuthStore } from '../stores'
+import { useForm } from '../hooks'
 
 /**
  * ProfilePage - User profile management
